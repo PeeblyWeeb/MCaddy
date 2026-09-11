@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Security.Cryptography;
+using System.Text.Json;
 using MCaddy.Network;
 using MCaddy.Network.Packets;
 using MCaddy.Network.Packets.Clientbound;
@@ -10,7 +11,12 @@ namespace MCaddy;
 
 public static class MCaddy
 {
-    public static void RegisterPackets()
+    private static readonly Logger Logger = new Logger("Main");
+    
+    private static readonly string AppPath = AppDomain.CurrentDomain.BaseDirectory;
+    private static readonly string PropertiesFilePath = $"{AppPath}/Properties.json";
+    
+    private static void RegisterPackets()
     {
         foreach (var type in AppDomain.CurrentDomain.GetAssemblies().SelectMany(s => s.GetTypes()))
         {
@@ -31,12 +37,47 @@ public static class MCaddy
             }
         }
     }
+
+    private static Properties LoadProperties()
+    {
+        try
+        {
+            if (File.Exists(PropertiesFilePath))
+                return JsonSerializer.Deserialize<Properties>(File.ReadAllText(PropertiesFilePath))!;
+        } catch (JsonException ex)
+        {
+            Logger.Log($"Failed to load from properties file: {ex}", Logger.LogLevel.Error);
+        }
+        
+        Logger.Log("Properties file is missing or invalid, using defaults.");
+        return new Properties();
+    }
+
+    private static void SaveProperties(Properties properties)
+    {
+        Logger.Log($"Saving properties to '{PropertiesFilePath}'");
+
+        using FileStream stream = new(PropertiesFilePath, FileMode.Create, FileAccess.Write);
+        stream.Write(JsonSerializer.SerializeToUtf8Bytes(properties, new JsonSerializerOptions()
+        {
+            WriteIndented = true,
+            IndentSize = 4
+        }));
+    }
     
     public static async Task Main(string[] args)
     {
+        Properties props = LoadProperties();
+        Console.CancelKeyPress += (_, _) =>
+        {
+            SaveProperties(props);
+        };
+        
         RegisterPackets();
-
-        var server = new Server("0.0.0.0", 25565);
+        
+        var server = new Server(props);
         await server.StartAsync();
+        
+        SaveProperties(props);
     }
 }

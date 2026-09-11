@@ -12,30 +12,31 @@ using BinaryWriter = Universal.Common.BinaryWriter;
 
 namespace MCaddy;
 
-public class Server(string host, ushort port)
+public class Server
 {
+    public static Properties Properties = null!;
+    
     private readonly Logger _logger = new("Server");
     
     private readonly CancellationTokenSource _cts = new();
-    private readonly TcpListener _listener = new(IPAddress.Parse(host), port);
+    private readonly TcpListener _listener;
 
     internal static readonly RSA KeyPair = RSA.Create(2048);
     internal static readonly HttpClient Http = new();
 
     internal static readonly DateTime StartTime = DateTime.Now;
-    
-    // some config, should be loaded from somewhere
-    internal const bool OnlineMode = true;
-    internal const bool UseEncryption = OnlineMode ? true : false;
-    internal const bool UseCompression = true;
-    internal const string TargetHost = "localhost";
-    internal const ushort TargetPort = 25566;
-    
 
+    internal Server(Properties props)
+    {
+        Properties = props;
+
+        _listener = new(IPAddress.Parse(Properties.Host), Properties.Port);
+    }
+    
     internal async Task StartAsync()
     {
         _listener.Start();
-        _logger.Log($"Listening on {host}:{port} ..");
+        _logger.Log($"Listening on {Properties.Host}:{Properties.Port} ..");
 
         while (!_cts.IsCancellationRequested)
         {

@@ -89,8 +89,8 @@ internal class C2SConnection(TcpClient client, CancellationToken ct = default) :
         
         await SendAsync(new HandshakePacket(
             protocolVersion: ProtocolVersion ?? 0,
-            serverAddress: Server.TargetHost,
-            serverPort: Server.TargetPort,
+            serverAddress: Server.Properties.TargetHost,
+            serverPort: Server.Properties.TargetPort,
             targetState: ConnectionState.Login
         ));
         await SendAsync(new LoginStartPacket(

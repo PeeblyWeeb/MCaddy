@@ -30,10 +30,8 @@ internal class LoginStartPacket(string username, Guid uuid) : IServerboundPacket
         
         connection.Uuid = uuid;
         connection.Username = username;
-
         
-        // TODO: move this above encryption
-        if (Server.UseCompression)
+        if (Server.Properties.CompressionThreshold != null)
         {
             await connection.SendAsync(new SetCompressionPacket(
                 threshold: 256
@@ -41,14 +39,14 @@ internal class LoginStartPacket(string username, Guid uuid) : IServerboundPacket
             connection.CompressionThreshold = 256;
         }
         
-        if (Server.UseEncryption)
+        if (Server.Properties.UseEncryption)
         {
             await connection.SendAsync(
                 new EncryptionRequestPacket(
                     "", // this is always empty, pretty much
                     Server.KeyPair.ExportSubjectPublicKeyInfo(),
                     connection.VerifyToken,
-                    Server.OnlineMode
+                    Server.Properties.OnlineMode
                 )
             );
         }
@@ -56,6 +54,8 @@ internal class LoginStartPacket(string username, Guid uuid) : IServerboundPacket
         {
             await connection.SendAsync(new LoginSuccessPacket(uuid, username));
             connection.State = ConnectionState.Configuration;
+            
+            await connection.SetupUpstreamClient();
         }
     }
 }

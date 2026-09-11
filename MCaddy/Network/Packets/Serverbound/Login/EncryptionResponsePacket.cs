@@ -51,7 +51,7 @@ internal class EncryptionResponsePacket(byte[] encryptedSharedSecret, byte[] enc
         }
         connection.SetEncryption(sharedSecret);
 
-        if (Server.OnlineMode)
+        if (Server.Properties.OnlineMode)
         {
             using var hashStream = new MemoryStream();
             hashStream.Write(Encoding.ASCII.GetBytes(""));

@@ -15,7 +15,7 @@ internal class S2CConnection(TcpClient client, CancellationToken ct = default) :
     internal async Task SetupUpstreamClient()
     {
         TcpClient client = new();
-        await client.ConnectAsync(Server.TargetHost, Server.TargetPort);
+        await client.ConnectAsync(Server.Properties.TargetHost, Server.Properties.TargetPort);
 
         UpstreamConnection = new(client, CancellationToken);
         await UpstreamConnection.StartLogin(this);

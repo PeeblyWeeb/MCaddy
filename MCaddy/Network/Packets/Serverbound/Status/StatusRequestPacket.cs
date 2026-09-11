@@ -32,7 +32,7 @@ internal class StatusRequestPacket() : IServerboundPacket
             Description = new ServerStatusResponse.DescriptionResponse
             {
                 Text = $"""
-                        §9§lMCaddy §f§lServer §8§l• §r§7Targeting §f{Server.TargetHost}§7:§8{Server.TargetPort}
+                        §9§lMCaddy §f§lServer §8§l• §r§7Targeting §f{Server.Properties.TargetHost}§7:§8{Server.Properties.TargetPort}
                         §fRunning since {Math.Round((DateTime.Now - Server.StartTime).TotalSeconds)} second(s) ago.
                         """
             },
