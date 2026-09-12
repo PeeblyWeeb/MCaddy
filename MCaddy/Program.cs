@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
+using MCaddy.Authentication;
 using MCaddy.Network;
 using MCaddy.Network.Packets;
 using MCaddy.Network.Packets.Clientbound;
@@ -14,7 +15,10 @@ public static class MCaddy
     private static readonly Logger Logger = new Logger("Main");
     
     private static readonly string AppPath = AppDomain.CurrentDomain.BaseDirectory;
-    private static readonly string PropertiesFilePath = $"{AppPath}/Properties.json";
+    private static readonly string PropertiesFilePath = $"{AppPath}Properties.json";
+    internal static readonly string AuthCacheFilePath = $"{AppPath}AuthCache.json";
+
+    internal static Properties Properties = null!;
     
     private static void RegisterPackets()
     {
@@ -67,17 +71,20 @@ public static class MCaddy
     
     public static async Task Main(string[] args)
     {
-        Properties props = LoadProperties();
+        Properties = LoadProperties();
         Console.CancelKeyPress += (_, _) =>
         {
-            SaveProperties(props);
+            SaveProperties(Properties);
         };
+        
+        Session session = new();
+        await session.Login();
         
         RegisterPackets();
         
-        var server = new Server(props);
+        var server = new Server(Properties);
         await server.StartAsync();
         
-        SaveProperties(props);
+        SaveProperties(Properties);
     }
 }
