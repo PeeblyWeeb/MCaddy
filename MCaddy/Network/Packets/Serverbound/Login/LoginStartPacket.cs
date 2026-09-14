@@ -12,7 +12,7 @@ internal class LoginStartPacket(string username, Guid uuid) : IServerboundPacket
     public void ToStream(BinaryWriter writer)
     {
         writer.Write(username);
-        writer.Write(uuid.ToByteArray());
+        writer.Write(uuid.ToByteArray(bigEndian: true));
     }
 
     public static IMinecraftPacket FromStream(BinaryReader reader)

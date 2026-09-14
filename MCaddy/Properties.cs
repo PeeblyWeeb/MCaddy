@@ -11,4 +11,5 @@ public record Properties()
     public bool UseEncryption { get; init; } = true;
     public int? CompressionThreshold { get; init; } = 256;
 
+    public string MicrosoftClientId { get; init; } = "00000000402b5328";
 }

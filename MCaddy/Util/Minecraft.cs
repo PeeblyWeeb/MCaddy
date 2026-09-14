@@ -4,10 +4,10 @@ using System.Text;
 
 namespace MCaddy.Util;
 
-public class MinecraftSha
+public class Minecraft
 {
     // https://gist.github.com/ammaraskar/7b4a3f73bee9dc4136539644a0f27e63
-    public static String MinecraftShaDigest(byte[] input) 
+    public static string MinecraftShaDigest(byte[] input) 
     {
         var hash = SHA1.Create().ComputeHash(input);
         // Reverse the bytes since BigInteger uses little endian
@@ -26,5 +26,16 @@ public class MinecraftSha
         {
             return b.ToString("x").TrimStart('0');
         }
+    }
+
+    internal static string GetServerHash(byte[] sharedSecret, byte[] publicKeyBytes, string serverId = "")
+    {
+        
+        using var hashStream = new MemoryStream();
+        hashStream.Write(Encoding.ASCII.GetBytes(serverId));
+        hashStream.Write(sharedSecret);
+        hashStream.Write(publicKeyBytes);
+
+        return MinecraftShaDigest(hashStream.ToArray());
     }
 }

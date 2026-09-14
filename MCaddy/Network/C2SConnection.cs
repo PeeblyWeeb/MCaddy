@@ -94,8 +94,8 @@ internal class C2SConnection(TcpClient client, CancellationToken ct = default) :
             targetState: ConnectionState.Login
         ));
         await SendAsync(new LoginStartPacket(
-            username: "WeeblyPeeb",
-            uuid: DownstreamConnection.Uuid ?? Guid.CreateVersion7()
+            username: MCaddy.Session.GameProfile.Name,
+            uuid: Guid.Parse(MCaddy.Session.GameProfile.Id)
         ));
         State = ConnectionState.Login;
         

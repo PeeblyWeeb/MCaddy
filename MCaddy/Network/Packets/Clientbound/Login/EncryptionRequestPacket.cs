@@ -1,3 +1,7 @@
+using System.Net.Http.Json;
+using System.Security.Cryptography;
+using MCaddy.Authentication.Requests.Minecraft;
+using MCaddy.Network.Packets.Serverbound.Login;
 using MCaddy.Util;
 using BinaryReader = Universal.Common.BinaryReader;
 using BinaryWriter = Universal.Common.BinaryWriter;
@@ -29,11 +33,40 @@ internal class EncryptionRequestPacket(
 
     public static IMinecraftPacket FromStream(BinaryReader reader)
     {
-        throw new NotImplementedException();
+        return new EncryptionRequestPacket(
+            serverId: reader.ReadString(),
+            publicKey: reader.ReadBytes(reader.Read7BitEncodedInt()),
+            verifyToken: reader.ReadBytes(reader.Read7BitEncodedInt()),
+            shouldAuthenticate: reader.ReadBoolean()
+        );
     }
 
-    public Task Handle(C2SConnection connection)
+    public async Task Handle(C2SConnection connection)
     {
-        throw new NotImplementedException();
+        byte[] sharedSecret = RandomNumberGenerator.GetBytes(16);
+        string serverHash = Minecraft.GetServerHash(sharedSecret, publicKey, serverId);
+
+        RSA loadedPublicKey = RSA.Create();
+        loadedPublicKey.ImportSubjectPublicKeyInfo(publicKey, out _);
+        
+        var response = await Server.Http.PostAsJsonAsync(
+            "https://sessionserver.mojang.com/session/minecraft/join",
+            new MinecraftJoinRequest()
+            {
+                AccessToken = MCaddy.Session.State.MinecraftTokenResponse!.AccessToken,
+                SelectedProfile = MCaddy.Session.GameProfile.Id,
+                ServerId = serverHash,
+            }
+        );
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException(
+                $"Failed to authenticate with session server: {response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
+
+        byte[] encryptedSharedSecret = loadedPublicKey.Encrypt(sharedSecret, RSAEncryptionPadding.Pkcs1);
+        byte[] encryptedVerifyToken = loadedPublicKey.Encrypt(verifyToken, RSAEncryptionPadding.Pkcs1);
+
+        await connection.SendAsync(new EncryptionResponsePacket(encryptedSharedSecret, encryptedVerifyToken));
+        
+        connection.SetEncryption(sharedSecret);
     }
 }

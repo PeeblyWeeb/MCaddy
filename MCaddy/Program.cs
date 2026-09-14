@@ -19,6 +19,7 @@ public static class MCaddy
     internal static readonly string AuthCacheFilePath = $"{AppPath}AuthCache.json";
 
     internal static Properties Properties = null!;
+    internal static Session Session = new();
     
     private static void RegisterPackets()
     {
@@ -76,9 +77,9 @@ public static class MCaddy
         {
             SaveProperties(Properties);
         };
-        
-        Session session = new();
-        await session.Login();
+
+        await Session.Login();
+        Logger.Log($"Logged in as {Session.GameProfile.Name}");
         
         RegisterPackets();
         

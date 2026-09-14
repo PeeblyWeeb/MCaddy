@@ -16,8 +16,4 @@
         <PackageReference Include="Universal.Common" Version="8.5.0"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Authentication\Requests\" />
-    </ItemGroup>
-
 </Project>

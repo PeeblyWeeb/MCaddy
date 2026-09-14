@@ -15,7 +15,10 @@ internal class EncryptionResponsePacket(byte[] encryptedSharedSecret, byte[] enc
 
     public void ToStream(BinaryWriter writer)
     {
-        throw new NotImplementedException();
+        writer.Write7BitEncodedInt(encryptedSharedSecret.Length);
+        writer.Write(encryptedSharedSecret);
+        writer.Write7BitEncodedInt(encryptedVerifyToken.Length);
+        writer.Write(encryptedVerifyToken);
     }
 
     public static IMinecraftPacket FromStream(BinaryReader reader)
@@ -53,12 +56,7 @@ internal class EncryptionResponsePacket(byte[] encryptedSharedSecret, byte[] enc
 
         if (Server.Properties.OnlineMode)
         {
-            using var hashStream = new MemoryStream();
-            hashStream.Write(Encoding.ASCII.GetBytes(""));
-            hashStream.Write(sharedSecret);
-            hashStream.Write(Server.KeyPair.ExportSubjectPublicKeyInfo());
-
-            var sessionHash = MinecraftSha.MinecraftShaDigest(hashStream.ToArray());
+            var sessionHash = Minecraft.GetServerHash(sharedSecret, Server.KeyPair.ExportSubjectPublicKeyInfo());
             var requestUrl = "https://sessionserver.mojang.com/session/minecraft/hasJoined" 
                                 + $"?username={connection.Username}&serverId={sessionHash}";
             
