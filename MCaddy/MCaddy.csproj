@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <SelfContained>true</SelfContained>
+        <SelfContained>false</SelfContained>
         <PublishSingleFile>true</PublishSingleFile>
         <EnableCompressionInBundle>true</EnableCompressionInBundle>
     </PropertyGroup>
