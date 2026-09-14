@@ -18,8 +18,8 @@ public static class MCaddy
     private static readonly string PropertiesFilePath = $"{AppPath}Properties.json";
     internal static readonly string AuthCacheFilePath = $"{AppPath}AuthCache.json";
 
-    internal static Properties Properties = null!;
-    internal static Session Session = new();
+    internal static readonly Properties Properties = LoadProperties();
+    internal static readonly Session Session = new();
     
     private static void RegisterPackets()
     {
@@ -72,7 +72,6 @@ public static class MCaddy
     
     public static async Task Main(string[] args)
     {
-        Properties = LoadProperties();
         Console.CancelKeyPress += (_, _) =>
         {
             SaveProperties(Properties);
@@ -86,6 +85,7 @@ public static class MCaddy
         var server = new Server(Properties);
         await server.StartAsync();
         
+        // in case server.StartAsync() stops for some reason, exception or something.
         SaveProperties(Properties);
     }
 }

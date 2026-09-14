@@ -1,6 +1,9 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using MCaddy.Authentication.Responses.Minecraft;
 using MCaddy.Network.Packets.Clientbound.Login;
 using MCaddy.Util;
 using BinaryReader = Universal.Common.BinaryReader;
@@ -60,14 +63,18 @@ internal class EncryptionResponsePacket(byte[] encryptedSharedSecret, byte[] enc
             var requestUrl = "https://sessionserver.mojang.com/session/minecraft/hasJoined" 
                                 + $"?username={connection.Username}&serverId={sessionHash}";
             
-            var res = await Server.Http.GetAsync(requestUrl);
-            if (res.StatusCode != HttpStatusCode.OK)
+            var response = await Server.Http.GetAsync(requestUrl);
+            if (response.StatusCode != HttpStatusCode.OK)
             {
                 connection.Logger.Log($"Failed to validate username", Logger.LogLevel.Error);
                 return;
             }
-            
-            // connection.Logger.Log($"Session server response: {await res.Content.ReadAsStringAsync()}", Logger.LogLevel.Debug);
+
+            connection.GameProfile = (await response.Content.ReadFromJsonAsync<MinecraftPlayerJoinResponse>(new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+            }))!;
+
             connection.SetIdentity(connection.Username!);
             connection.Logger.Log($"Client authenticated as {connection.Username}, session server said so!");
         }

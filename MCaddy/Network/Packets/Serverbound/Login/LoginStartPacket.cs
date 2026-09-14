@@ -1,3 +1,4 @@
+using MCaddy.Authentication.Responses.Minecraft;
 using MCaddy.Network.Packets.Clientbound.Login;
 using BinaryReader = Universal.Common.BinaryReader;
 using BinaryWriter = Universal.Common.BinaryWriter;
@@ -52,7 +53,7 @@ internal class LoginStartPacket(string username, Guid uuid) : IServerboundPacket
         }
         else
         {
-            await connection.SendAsync(new LoginSuccessPacket(uuid, username));
+            await connection.SendAsync(new LoginSuccessPacket(uuid, username, []));
             connection.State = ConnectionState.Configuration;
             
             await connection.SetupUpstreamClient();

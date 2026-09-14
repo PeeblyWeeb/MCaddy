@@ -1,5 +1,6 @@
 using System.Net.Sockets;
 using System.Security.Cryptography;
+using MCaddy.Authentication.Responses.Minecraft;
 
 namespace MCaddy.Network;
 
@@ -11,6 +12,7 @@ internal class S2CConnection(TcpClient client, CancellationToken ct = default) :
     internal string? Username;
 
     internal C2SConnection? UpstreamConnection;
+    internal MinecraftPlayerJoinResponse? GameProfile;
 
     internal async Task SetupUpstreamClient()
     {
