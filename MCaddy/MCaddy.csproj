@@ -16,4 +16,9 @@
         <PackageReference Include="Universal.Common" Version="8.5.0"/>
     </ItemGroup>
 
+    <PropertyGroup>
+        <SelfContained>true</SelfContained>
+        <PublishSingleFile>true</PublishSingleFile>
+        <EnableCompressionInBundle>true</EnableCompressionInBundle>
+    </PropertyGroup>
 </Project>
