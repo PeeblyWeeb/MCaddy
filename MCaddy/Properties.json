@@ -1,0 +1,10 @@
+{
+    "Host": "127.0.0.1",
+    "Port": 25565,
+    "TargetHost": "127.0.0.1",
+    "TargetPort": 25566,
+    "OnlineMode": true,
+    "UseEncryption": true,
+    "CompressionThreshold": 256,
+    "MicrosoftClientId": "00000000402b5328"
+}
